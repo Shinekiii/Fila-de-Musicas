@@ -1,9 +1,10 @@
+
 let player;
 const playlist = [];
 let currentIndex = 0;
-const apiKey = 'AIzaSyCNjDl65AiVsQC77GjfNKd-klVO1pO63PQ'; // Sua API Key do YouTube
+const apiKey = 'AIzaSyCNjDl65AiVsQC77GjfNKd-klVO1pO63PQ';
 
-// Carrega a API do YouTube
+// Carrega a API do youTube
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
         height: '360',
@@ -16,7 +17,7 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
-// Adiciona vídeo à fila pelo nome
+// Adiciona musicas na fila pelo nome
 function searchAndAddVideo() {
     const videoName = document.getElementById('videoNameInput').value.trim();
     if (videoName) {
@@ -24,7 +25,7 @@ function searchAndAddVideo() {
     }
 }
 
-// Busca vídeo pelo nome
+// Busca musicas pelo nome
 function searchVideoByName(name) {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(name)}&type=video&key=${apiKey}`;
     fetch(url)
@@ -44,25 +45,7 @@ function searchVideoByName(name) {
         });
 }
 
-// Envia o nome do vídeo para o servidor
-function sendVideoToQueue(videoName) {
-    fetch('https://music-queue.netlify.app/add-to-queue', { // Substitua pelo endpoint correto
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ videoName: videoName }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Resposta do servidor:', data.message);
-        })
-        .catch(error => {
-            console.error('Erro ao enviar música para a fila:', error);
-        });
-}
-
-// Adiciona o vídeo à fila
+// Adiciona o musicas na fila
 function addVideoToQueue(videoId, videoTitle) {
     if (videoId) {
         playlist.push({ id: videoId, title: videoTitle });
@@ -72,9 +55,6 @@ function addVideoToQueue(videoId, videoTitle) {
             playVideo();
         }
         document.getElementById('videoNameInput').value = '';
-
-        // Envia o nome do vídeo para o servidor
-        sendVideoToQueue(videoTitle);
     }
 }
 
@@ -114,24 +94,28 @@ function skipCurrent() {
     nextVideo();
 }
 
-// Avança para o próximo vídeo
+// Avança para a proxima musica
 function nextVideo() {
     if (playlist.length > 0) {
-        // Remove o vídeo atual da fila
+        // Remove a musica atual da fila
         playlist.splice(currentIndex, 1);
         savePlaylistToLocalStorage();
+
+        // Atualiza a exibição da lista
         updatePlaylistDisplay();
+
+        // Avança para a proxima musica
         if (playlist.length > 0) {
             currentIndex = (currentIndex < playlist.length) ? currentIndex : 0;
             playVideo();
         } else {
-            player.stopVideo(); // Para o vídeo se a fila estiver vazia
+            player.stopVideo(); // Para a musica se a fila estiver vazia
         }
     }
 }
 
-// Verifica se deve pular a música a cada segundo
-setInterval(() => {
+// Verifica se a musica esta terminando
+function checkIfShouldSkip() {
     if (player && player.getVideoLoadedFraction() > 0) {
         const duration = player.getDuration();
         const currentTime = player.getCurrentTime();
@@ -139,12 +123,15 @@ setInterval(() => {
             nextVideo();
         }
     }
-}, 1000);
+}
 
-// Adiciona o ouvinte de evento para o Enter
+// Verifica se deve pular a musica 
+setInterval(checkIfShouldSkip, 1000);
+
+// Adiciona o Enter
 document.getElementById('videoNameInput').addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
-        event.preventDefault(); // Evita o comportamento padrão do Enter
+        event.preventDefault();
         searchAndAddVideo();
     }
 });
@@ -167,6 +154,18 @@ function loadPlaylistFromLocalStorage() {
     }
 }
 
+function toggleTheme() {
+    const body = document.body;
+    if (body.classList.contains('light')) {
+        body.classList.remove('light');
+        body.classList.add('dark');
+    } else {
+        body.classList.remove('dark');
+        body.classList.add('light');
+    }
+}
+
+
 // Carrega a API do YouTube
 function loadYouTubeAPI() {
     const tag = document.createElement('script');
@@ -175,6 +174,6 @@ function loadYouTubeAPI() {
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 }
 
-// Inicia a carga da API do YouTube e carrega a playlist
+// Inicia a API do YouTube e carrega a playlist
 loadYouTubeAPI();
 loadPlaylistFromLocalStorage();

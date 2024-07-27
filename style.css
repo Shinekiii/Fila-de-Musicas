@@ -90,7 +90,7 @@ body.dark .start-container h1 {
     color: #9b59b6;
 }
 
-/* Botão de Alternância de Tema */
+/* Botão para alternar o tema */
 .theme-toggle {
     position: fixed;
     top: 20px;
@@ -117,7 +117,7 @@ body.dark .start-container h1 {
     display: none;
 }
 
-/* Media Queries para dispositivos móveis */
+/* mediaquery para mobile */
 @media (max-width: 768px) {
     .start-container {
         width: 90%;
