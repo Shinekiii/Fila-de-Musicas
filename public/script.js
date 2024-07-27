@@ -24,18 +24,20 @@ function searchAndAddVideo() {
     }
 }
 
-// Busca vídeo pelo nome
 function searchVideoByName(name) {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(name)}&type=video&key=${apiKey}`;
+    console.log('URL da API:', url); // Mensagem de depuração
     fetch(url)
         .then(response => response.json())
         .then(data => {
+            console.log('Resposta da API:', data); // Mensagem de depuração
             if (data.items.length > 0) {
                 const video = data.items[0];
                 const videoId = video.id.videoId;
                 const videoTitle = video.snippet.title;
                 addVideoToQueue(videoId, videoTitle);
             } else {
+                console.log('Nenhum vídeo encontrado.');
                 alert('Nenhum vídeo encontrado.');
             }
         })
@@ -43,6 +45,7 @@ function searchVideoByName(name) {
             console.error('Erro na busca do vídeo:', error);
         });
 }
+
 
 // Adiciona o vídeo à fila
 function addVideoToQueue(videoId, videoTitle) {
