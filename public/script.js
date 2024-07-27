@@ -175,6 +175,8 @@ function addSongFromUrl() {
     const songName = getQueryParam('add');
     if (songName) {
         searchAndAddVideo(songName); // Chama a função para adicionar a música
+        // Remove o parâmetro da URL para evitar a repetição
+        history.replaceState(null, '', window.location.pathname);
     }
 }
 
@@ -182,6 +184,7 @@ function addSongFromUrl() {
 window.onload = function () {
     addSongFromUrl();
 };
+
 
 
 // Carrega a API do YouTube
