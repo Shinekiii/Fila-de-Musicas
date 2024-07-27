@@ -17,6 +17,14 @@ function onYouTubeIframeAPIReady() {
 }
 
 // Função para buscar vídeos pelo nome
+function searchAndAddVideo() {
+    const videoName = document.getElementById('videoNameInput').value.trim();
+    if (videoName) {
+        searchVideoByName(videoName);
+    }
+}
+
+// Função para buscar vídeos pelo nome
 function searchVideoByName(name) {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(name)}&type=video&key=${apiKey}`;
     fetch(url)
