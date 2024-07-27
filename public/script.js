@@ -1,7 +1,7 @@
 let player;
 const playlist = [];
 let currentIndex = 0;
-const apiKey = 'AIzaSyCNjDl65AiVsQC77GjfNKd-klVO1pO63PQ'; // Sua API Key do YouTube
+const apiKey = 'AIzaSyCNjDl65AiVsQC77GjfNKd-klVO1pO63PQ'; // Substitua pela sua chave da API
 
 // Função chamada quando a API do YouTube está carregada
 function onYouTubeIframeAPIReady() {
@@ -16,15 +16,7 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
-// Adiciona vídeo à fila pelo nome
-function searchAndAddVideo() {
-    const videoName = document.getElementById('videoNameInput').value.trim();
-    if (videoName) {
-        searchVideoByName(videoName);
-    }
-}
-
-// Busca vídeo pelo nome
+// Função para buscar vídeos pelo nome
 function searchVideoByName(name) {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(name)}&type=video&key=${apiKey}`;
     fetch(url)
