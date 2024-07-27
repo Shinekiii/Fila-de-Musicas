@@ -1,9 +1,9 @@
 let player;
 const playlist = [];
 let currentIndex = 0;
-const apiKey = 'AIzaSyCNjDl65AiVsQC77GjfNKd-klVO1pO63PQ'; // Substitua pela sua chave da API
+const apiKey = 'AIzaSyCNjDl65AiVsQC77GjfNKd-klVO1pO63PQ'; // Sua API Key do YouTube
 
-// Função chamada quando a API do YouTube está carregada
+// Carrega a API do YouTube
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
         height: '360',
@@ -16,7 +16,7 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
-// Função para buscar vídeos pelo nome
+// Adiciona vídeo à fila pelo nome
 function searchAndAddVideo() {
     const videoName = document.getElementById('videoNameInput').value.trim();
     if (videoName) {
@@ -24,13 +24,12 @@ function searchAndAddVideo() {
     }
 }
 
-// Função para buscar vídeos pelo nome
+// Busca vídeo pelo nome
 function searchVideoByName(name) {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(name)}&type=video&key=${apiKey}`;
     fetch(url)
         .then(response => response.json())
         .then(data => {
-            console.log('Resposta da API:', data);
             if (data.items.length > 0) {
                 const video = data.items[0];
                 const videoId = video.id.videoId;
@@ -45,6 +44,24 @@ function searchVideoByName(name) {
         });
 }
 
+// Envia o nome do vídeo para o servidor
+function sendVideoToQueue(videoName) {
+    fetch('https://music-queue.netlify.app/add-to-queue', { // Substitua pelo endpoint correto
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ videoName: videoName }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Resposta do servidor:', data.message);
+        })
+        .catch(error => {
+            console.error('Erro ao enviar música para a fila:', error);
+        });
+}
+
 // Adiciona o vídeo à fila
 function addVideoToQueue(videoId, videoTitle) {
     if (videoId) {
@@ -55,6 +72,9 @@ function addVideoToQueue(videoId, videoTitle) {
             playVideo();
         }
         document.getElementById('videoNameInput').value = '';
+
+        // Envia o nome do vídeo para o servidor
+        sendVideoToQueue(videoTitle);
     }
 }
 
@@ -97,6 +117,7 @@ function skipCurrent() {
 // Avança para o próximo vídeo
 function nextVideo() {
     if (playlist.length > 0) {
+        // Remove o vídeo atual da fila
         playlist.splice(currentIndex, 1);
         savePlaylistToLocalStorage();
         updatePlaylistDisplay();
@@ -123,7 +144,7 @@ setInterval(() => {
 // Adiciona o ouvinte de evento para o Enter
 document.getElementById('videoNameInput').addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
-        event.preventDefault();
+        event.preventDefault(); // Evita o comportamento padrão do Enter
         searchAndAddVideo();
     }
 });
