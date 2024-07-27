@@ -164,6 +164,25 @@ function toggleTheme() {
     }
 }
 
+// Função para obter parâmetros da URL
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
+// Função para adicionar música à fila
+function addSongFromUrl() {
+    const songName = getQueryParam('add');
+    if (songName) {
+        searchAndAddVideo(songName); // Chama a função para adicionar a música
+    }
+}
+
+// Chama a função ao carregar a página
+window.onload = function () {
+    addSongFromUrl();
+};
+
 
 // Carrega a API do YouTube
 function loadYouTubeAPI() {
