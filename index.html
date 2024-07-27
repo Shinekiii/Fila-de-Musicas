@@ -4,10 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player de Música</title>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <title>Bem-vindo ao Player de Música</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
 </head>
 
 <body class="dark">
@@ -15,17 +13,18 @@
         <img src="https://img.icons8.com/ios/50/000000/sun--v1.png" alt="Tema Claro" class="icon light-icon">
         <img src="https://img.icons8.com/ios/50/ffffff/moon-symbol.png" alt="Tema Escuro" class="icon dark-icon">
     </div>
-    <div class="container">
-        <div class="sidebar">
-            <h1>Player de Música</h1>
-            <input type="text" id="videoNameInput" placeholder="Nome do vídeo">
-            <button onclick="searchAndAddVideo()">Adicionar à Fila</button>
-            <button onclick="skipCurrent()">Pular Música</button>
-            <ul id="playlist"></ul>
+    <div class="start-screen">
+        <div class="start-container">
+            <h1>Bem-vindo ao Player de Música</h1>
+            <p>Explore, adicione e ouça suas músicas favoritas.</p>
+            <button onclick="startApp()">Começar</button>
         </div>
-        <div id="player"></div>
     </div>
     <script>
+        function startApp() {
+            window.location.href = 'public/index.html';
+        }
+
         function toggleTheme() {
             document.body.classList.toggle('dark');
             document.body.classList.toggle('light');
