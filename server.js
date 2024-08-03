@@ -1,15 +1,18 @@
 const express = require('express');
-const axios = require('axios');
 const path = require('path');
-const cors = require('cors');  // Adicione esta linha
+const cors = require('cors');
 
 const app = express();
 const port = 3000;
 
-app.use(cors());  // Adicione esta linha
+// Adiciona suporte a CORS
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Fila de músicas (em memória)
+let musicQueue = [];
 
 // Serve start.html
 app.get('/', (req, res) => {
@@ -21,20 +24,24 @@ app.get('/index', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Music queue (GET route to get the current music queue)
+// Rota para obter a fila de músicas
 app.get('/api/music-queue', (req, res) => {
-    // Logic to get the music queue
-    res.json({ queue: 'Here will be the music queue' });
+    res.json({ queue: musicQueue });
 });
 
-// Add music to queue (POST route to add a new music)
+// Rota para adicionar uma música à fila
 app.post('/api/add-music', (req, res) => {
     const { nome } = req.body;
 
-    // Adicione a música na fila (a lógica exata dependerá da sua implementação)
-    console.log(`Música recebida: ${nome}`);
+    if (!nome) {
+        return res.status(400).json({ message: 'O nome da música é obrigatório' });
+    }
 
-    res.json({ message: 'Música adicionada com sucesso' });
+    // Adiciona a música na fila
+    musicQueue.push({ nome });
+    console.log(`Música adicionada: ${nome}`);
+
+    res.json({ message: 'Música adicionada com sucesso', queue: musicQueue });
 });
 
 app.listen(port, () => {
