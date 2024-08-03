@@ -1,10 +1,12 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const cors = require('cors');  // Adicione esta linha
 
 const app = express();
 const port = 3000;
 
+app.use(cors());  // Adicione esta linha
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -29,14 +31,10 @@ app.get('/api/music-queue', (req, res) => {
 app.post('/api/add-music', (req, res) => {
     const { nome } = req.body;
 
-    axios.post('https://music-queue.netlify.app/api/add-music', { nome })
-        .then(response => {
-            res.json({ message: 'Música adicionada com sucesso', data: response.data });
-        })
-        .catch(error => {
-            console.error(error);
-            res.status(500).json({ message: 'Erro ao adicionar música', error: error.message });
-        });
+    // Adicione a música na fila (a lógica exata dependerá da sua implementação)
+    console.log(`Música recebida: ${nome}`);
+
+    res.json({ message: 'Música adicionada com sucesso' });
 });
 
 app.listen(port, () => {
