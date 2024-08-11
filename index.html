@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bem-vindo ao Player de Música</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="dark">
     <div class="theme-toggle" onclick="toggleTheme()">
         <img src="https://img.icons8.com/ios/50/000000/sun--v1.png" alt="Tema Claro" class="icon light-icon">
@@ -16,12 +18,11 @@
             <h1>Bem-vindo ao Player de Música</h1>
             <p>Explore, adicione e ouça suas músicas favoritas.</p>
             <button onclick="startApp()">Começar</button>
-            <button onclick="window.location.href='/auth/google'">Login com Google</button>
         </div>
     </div>
     <script>
         function startApp() {
-            window.location.href = '/index';
+            window.location.href = 'public/index.html';
         }
 
         function toggleTheme() {
@@ -39,4 +40,5 @@
         }
     </script>
 </body>
+
 </html>
