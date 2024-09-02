@@ -1,23 +1,24 @@
-
 let player;
-const playlist = [];
-let currentIndex = 0;
 const apiKey = 'AIzaSyCNjDl65AiVsQC77GjfNKd-klVO1pO63PQ';
 
-// Carrega a API do youTube
+// Carrega a API do YouTube
 function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-        height: '360',
-        width: '640',
-        videoId: playlist[currentIndex]?.id,
-        events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-        }
-    });
+    fetch('/api/playlist')
+        .then(response => response.json())
+        .then(playlist => {
+            player = new YT.Player('player', {
+                height: '360',
+                width: '640',
+                videoId: playlist.length > 0 ? playlist[0].id : null,
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        });
 }
 
-// Adiciona musicas na fila pelo nome
+// Adiciona músicas na fila pelo nome
 function searchAndAddVideo() {
     const videoName = document.getElementById('videoNameInput').value.trim();
     if (videoName) {
@@ -25,7 +26,7 @@ function searchAndAddVideo() {
     }
 }
 
-// Busca musicas pelo nome
+// Busca músicas pelo nome
 function searchVideoByName(name) {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(name)}&type=video&key=${apiKey}`;
     fetch(url)
@@ -45,28 +46,44 @@ function searchVideoByName(name) {
         });
 }
 
-// Adiciona o musicas na fila
+// Adiciona músicas na fila
 function addVideoToQueue(videoId, videoTitle) {
     if (videoId) {
-        playlist.push({ id: videoId, title: videoTitle });
-        savePlaylistToLocalStorage();
-        updatePlaylistDisplay();
-        if (playlist.length === 1) {
-            playVideo();
-        }
-        document.getElementById('videoNameInput').value = '';
+        fetch('/api/playlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videoId, videoTitle })
+        })
+        .then(response => response.json())
+        .then(() => {
+            updatePlaylistDisplay();
+            if (player && playlist.length === 1) {
+                playVideo();
+            }
+            document.getElementById('videoNameInput').value = '';
+        })
+        .catch(error => {
+            console.error('Erro ao adicionar o vídeo:', error);
+        });
     }
 }
 
 // Atualiza a exibição da playlist
 function updatePlaylistDisplay() {
-    const playlistUl = document.getElementById('playlist');
-    playlistUl.innerHTML = '';
-    playlist.forEach((video, index) => {
-        const li = document.createElement('li');
-        li.textContent = video.title;
-        playlistUl.appendChild(li);
-    });
+    fetch('/api/playlist')
+        .then(response => response.json())
+        .then(playlist => {
+            const playlistUl = document.getElementById('playlist');
+            playlistUl.innerHTML = ''; // Limpa a lista atual
+            playlist.forEach(video => {
+                const li = document.createElement('li');
+                li.textContent = video.title;
+                playlistUl.appendChild(li);
+            });
+        })
+        .catch(error => {
+            console.error('Erro ao atualizar a exibição da playlist:', error);
+        });
 }
 
 // Função chamada quando o player está pronto
@@ -83,10 +100,14 @@ function onPlayerStateChange(event) {
 
 // Reproduz o vídeo atual
 function playVideo() {
-    if (playlist.length > 0) {
-        player.loadVideoById(playlist[currentIndex].id);
-        player.playVideo();
-    }
+    fetch('/api/playlist')
+        .then(response => response.json())
+        .then(playlist => {
+            if (playlist.length > 0) {
+                player.loadVideoById(playlist[0].id);
+                player.playVideo();
+            }
+        });
 }
 
 // Pula a música atual
@@ -94,27 +115,20 @@ function skipCurrent() {
     nextVideo();
 }
 
-// Avança para a proxima musica
+// Avança para a próxima música
 function nextVideo() {
-    if (playlist.length > 0) {
-        // Remove a musica atual da fila
-        playlist.splice(currentIndex, 1);
-        savePlaylistToLocalStorage();
-
-        // Atualiza a exibição da lista
-        updatePlaylistDisplay();
-
-        // Avança para a proxima musica
-        if (playlist.length > 0) {
-            currentIndex = (currentIndex < playlist.length) ? currentIndex : 0;
+    fetch('/api/playlist/next', { method: 'POST' })
+        .then(response => response.json())
+        .then(() => {
+            updatePlaylistDisplay();
             playVideo();
-        } else {
-            player.stopVideo(); // Para a musica se a fila estiver vazia
-        }
-    }
+        })
+        .catch(error => {
+            console.error('Erro ao pular o vídeo:', error);
+        });
 }
 
-// Verifica se a musica esta terminando
+// Verifica se a música está terminando
 function checkIfShouldSkip() {
     if (player && player.getVideoLoadedFraction() > 0) {
         const duration = player.getDuration();
@@ -125,7 +139,7 @@ function checkIfShouldSkip() {
     }
 }
 
-// Verifica se deve pular a musica 
+// Verifica se deve pular a música
 setInterval(checkIfShouldSkip, 1000);
 
 // Adiciona o Enter
@@ -136,24 +150,7 @@ document.getElementById('videoNameInput').addEventListener('keydown', function (
     }
 });
 
-// Salva a playlist no localStorage
-function savePlaylistToLocalStorage() {
-    localStorage.setItem('playlist', JSON.stringify(playlist));
-}
-
-// Carrega a playlist do localStorage
-function loadPlaylistFromLocalStorage() {
-    const savedPlaylist = localStorage.getItem('playlist');
-    if (savedPlaylist) {
-        playlist.push(...JSON.parse(savedPlaylist));
-        updatePlaylistDisplay();
-        if (playlist.length > 0) {
-            currentIndex = 0;
-            onYouTubeIframeAPIReady(); // Recria o player se necessário
-        }
-    }
-}
-
+// Toggle theme
 function toggleTheme() {
     const body = document.body;
     if (body.classList.contains('light')) {
@@ -165,7 +162,6 @@ function toggleTheme() {
     }
 }
 
-
 // Carrega a API do YouTube
 function loadYouTubeAPI() {
     const tag = document.createElement('script');
@@ -176,4 +172,4 @@ function loadYouTubeAPI() {
 
 // Inicia a API do YouTube e carrega a playlist
 loadYouTubeAPI();
-loadPlaylistFromLocalStorage();
+updatePlaylistDisplay(); // Atualiza a playlist diretamente da API
